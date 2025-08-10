@@ -1,0 +1,464 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TurboPortuguês — v2</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f1220"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root { --bg:#0f1220; --card:#181c2f; --ink:#e9ecff; --muted:#b6b9d6; --acc:#66e0a3; --warn:#ffd166; --bad:#ef476f; --good:#06d6a0; --btn:#2a2f4a;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  header{position:sticky;top:0;background:linear-gradient(180deg,#0f1220 80%,transparent);padding:16px 12px 6px;border-bottom:1px solid #22284a;z-index:5}
+  h1{font-size:20px;margin:0 0 6px 0}
+  .sub{color:var(--muted);font-size:13px}
+  .wrap{padding:14px;max-width:980px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+  .card{background:var(--card);border:1px solid #22284a;border-radius:14px;padding:16px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  button{background:var(--btn);color:var(--ink);border:none;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
+  button:active{transform:translateY(1px)}
+  .pill{background:#232845;color:var(--muted);padding:4px 8px;border-radius:999px;font-size:12px}
+  .pt{font-size:26px;font-weight:800}
+  .ipa{color:var(--muted);font-family:ui-monospace, Menlo, Consolas, monospace}
+  .en{color:#dbe0ff}
+  .big{font-size:32px;font-weight:900;text-align:center;margin:10px 0}
+  .center{text-align:center}
+  .right{text-align:right}
+  .ratebar{display:flex;gap:10px;justify-content:center}
+  .ratebar button{flex:1}
+  .good{background:var(--good)}
+  .hard{background:#f7b801;color:#1a1a1a}
+  .again{background:var(--bad)}
+  .easy{background:#118ab2}
+  .hidden{display:none}
+  .muted{color:var(--muted)}
+  .section-title{font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+  .mono{font-family:ui-monospace, Menlo, Consolas, monospace;font-size:12px;color:#c8ccff}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .kpi .card{padding:12px}
+  .kpi .num{font-size:20px;font-weight:900}
+  .tag{background:#253050;padding:2px 8px;border-radius:999px;margin-right:6px}
+  .small{font-size:12px}
+  .input{width:100%;background:#11152a;color:var(--ink);border:1px solid #242a52;border-radius:10px;padding:10px}
+  .link{color:#66e0a3;text-decoration:underline;cursor:pointer}
+  .tabs{display:flex;gap:8px;margin-bottom:10px}
+  .tab{padding:8px 12px;border-radius:10px;background:#232845;cursor:pointer}
+  .tab.active{background:#2f3865}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <h1>TurboPortuguês <span class="pill">v2</span></h1>
+  <div class="sub">PWA installable • Expanded decks • Better SRS • Missions • Minimal Pairs • Offline</div>
+</header>
+
+<div class="wrap grid">
+  <!-- LEFT: Dashboard -->
+  <section class="card">
+    <div class="section-title">Today</div>
+    <div class="kpi">
+      <div class="card"><div class="small muted">Due Reviews</div><div id="kpi-due" class="num">0</div></div>
+      <div class="card"><div class="small muted">New Cards</div><div id="kpi-new" class="num">0</div></div>
+      <div class="card"><div class="small muted">Streak</div><div id="kpi-streak" class="num">0</div></div>
+      <div class="card"><div class="small muted">Retention</div><div id="kpi-ret" class="num">–</div></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button id="btn-start">Start Reviews</button>
+      <button id="btn-new">Learn New (5)</button>
+      <button id="btn-mission">Chat Mission</button>
+      <button id="btn-export">Export Progress</button>
+      <button id="btn-install" class="hidden">Install App</button>
+    </div>
+    <div class="small muted" style="margin-top:8px">Tip: turn on a Brazilian Portuguese voice in Settings for best TTS.</div>
+    <div id="install-hint" class="small muted" style="margin-top:6px"></div>
+  </section>
+
+  <!-- RIGHT: Sound Gym -->
+  <section class="card">
+    <div class="section-title">Sound Gym</div>
+    <div class="row">
+      <button onclick="playSample('casa / caça', 'ˈkazɐ / ˈkasɐ')">/z/ vs /s/</button>
+      <button onclick="playSample('caro / carro', 'ˈkaɾu / ˈkaʁu')">r vs rr</button>
+      <button onclick="playSample('tia / dia', 'ˈtʃiɐ / ˈdʒiɐ')">ch vs j</button>
+      <button onclick="playSample('pão / pau', 'pɐ̃w / paw')">nasal ã</button>
+      <button onclick="playSample('filho', 'ˈfiʎu')">lh /ʎ/</button>
+      <button onclick="playSample('banho', 'ˈbɐɲu')">nh /ɲ/</button>
+    </div>
+    <div class="small muted" style="margin-top:8px">Use Minimal Pairs below for focused reps and recording.</div>
+  </section>
+
+  <!-- Review / Learn Panel -->
+  <section class="card" id="review-panel">
+    <div class="section-title">Spaced Repetition</div>
+    <div class="tabs">
+      <div class="tab active" data-deck="core">Core</div>
+      <div class="tab" data-deck="restaurant">Restaurant</div>
+      <div class="tab" data-deck="rideshare">Rideshare</div>
+      <div class="tab" data-deck="emergency">Emergency</div>
+    </div>
+    <div id="review-empty" class="center muted">No cards queued. Hit “Start Reviews” or “Learn New”.</div>
+    <div id="review-ui" class="hidden">
+      <div id="card-idx" class="small muted right"></div>
+      <div class="big" id="pt"></div>
+      <div class="center ipa" id="ipa"></div>
+      <div class="center muted" id="tags"></div>
+      <div class="row center" style="justify-content:center;margin:14px 0">
+        <button id="btn-tts">🔊 Listen</button>
+        <button id="btn-reveal">Reveal</button>
+        <button id="btn-record">🎙️ Shadow</button>
+      </div>
+      <div id="en" class="en center hidden"></div>
+      <div class="ratebar hidden" id="ratebar">
+        <button class="again" onclick="grade(0)">Again</button>
+        <button class="hard" onclick="grade(3)">Hard</button>
+        <button class="good" onclick="grade(4)">Good</button>
+        <button class="easy" onclick="grade(5)">Easy</button>
+      </div>
+      <div id="rec-status" class="center small muted"></div>
+    </div>
+  </section>
+
+  <!-- Minimal Pairs -->
+  <section class="card">
+    <div class="section-title">Minimal Pairs</div>
+    <div id="mp-ui">
+      <div class="row">
+        <select id="mp-select"></select>
+        <button onclick="mpPlayA()">🔊 A</button>
+        <button onclick="mpPlayB()">🔊 B</button>
+        <button onclick="mpRandom()">Shuffle</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div><span class="pill">A</span> <span id="mp-a" class="pt"></span> <span id="mp-a-en" class="muted small"></span></div>
+      </div>
+      <div class="row">
+        <div><span class="pill">B</span> <span id="mp-b" class="pt"></span> <span id="mp-b-en" class="muted small"></span></div>
+      </div>
+      <div class="small muted" style="margin-top:8px">Say A×5, B×5, then ABABAB. Record yourself in SRS.</div>
+    </div>
+  </section>
+
+  <!-- Missions -->
+  <section class="card">
+    <div class="section-title">Chat Mission</div>
+    <div id="mission"></div>
+    <div class="row" style="margin-top:8px">
+      <button onclick="nextMission()">New Mission</button>
+      <button onclick="speakMission()">🔊 Speak Prompt</button>
+    </div>
+  </section>
+
+  <!-- Week Plan -->
+  <section class="card">
+    <div class="section-title">Week 1 Turbo Plan</div>
+    <div class="small">
+      <ul>
+        <li><b>Daily (45–60 min):</b> Sound Gym → SRS chunks → Listening → Shadow → Mission.</li>
+        <li><b>D1:</b> Greetings; mission: say hi to 3 Brazilians.</li>
+        <li><b>D2:</b> Café ordering; mission: coffee voice note.</li>
+        <li><b>D3:</b> Time & paying; minimal pairs caro/carro, faca/vaca.</li>
+        <li><b>D4:</b> Review sprint; directions.</li>
+        <li><b>D5:</b> Quero/Preciso/Posso + verbo; rideshare dialogs.</li>
+        <li><b>D6:</b> 30 min PT YouTube; 5-sentence intro.</li>
+        <li><b>D7:</b> 2-min monologue + listening quiz; fix error deck.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+// ---------- PWA Install Prompt ----------
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('btn-install').classList.remove('hidden');
+});
+document.getElementById('btn-install').addEventListener('click', async () => {
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById('btn-install').classList.add('hidden');
+  }
+});
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js');
+  });
+}
+(function showIOSHint(){
+  const ua = navigator.userAgent;
+  const isiOS = /iPhone|iPad|iPod/i.test(ua);
+  if(isiOS){
+    document.getElementById('install-hint').textContent = "On iPhone: open this site in Safari → Share → Add to Home Screen.";
+  }
+})();
+
+// ---------- Content Decks ----------
+const CORE = [
+  {id:1, pt:"Oi! Tudo bem?", en:"Hi! How are you?", ipa:"oj ˈtudu bẽj", tags:["greeting"]},
+  {id:2, pt:"Tudo bem, e você?", en:"I’m good, and you?", ipa:"ˈtudu bẽj i voˈse", tags:["smalltalk"]},
+  {id:3, pt:"Prazer em te conhecer.", en:"Nice to meet you.", ipa:"pɾaˈzeɾ ẽj tʃi koɲeˈseɾ", tags:["greeting"]},
+  {id:4, pt:"Você pode falar mais devagar?", en:"Can you speak more slowly?", ipa:"voˈse ˈpɔdʒi faˈlaɾ majʃ dʒevaˈgaɾ", tags:["comprehension"]},
+  {id:5, pt:"Pode repetir, por favor?", en:"Can you repeat, please?", ipa:"ˈpɔdʒi ʁepiˈtiɾ poɾ faˈvoɾ", tags:["comprehension"]},
+  {id:6, pt:"A conta, por favor.", en:"The check, please.", ipa:"a ˈkõtɐ poɾ faˈvoɾ", tags:["restaurant"]},
+  {id:7, pt:"Onde fica o banheiro?", en:"Where is the bathroom?", ipa:"ˈõdʒi ˈfikɐ u bɐˈɲeɾu", tags:["travel"]},
+  {id:8, pt:"Eu quero/preciso/posso + verbo.", en:"I want/need/can + verb.", ipa:"", tags:["pattern"]},
+  {id:9, pt:"Que horas são?", en:"What time is it?", ipa:"ki ˈɔɾɐs sɐ̃w", tags:["time"]},
+  {id:10, pt:"Obrigado(a).", en:"Thank you.", ipa:"obɾiˈgadʊ / obɾiˈgadɐ", tags:["polite"]}
+];
+const RESTAURANT = [
+  {id:101, pt:"Eu queria um espresso, por favor.", en:"I’d like an espresso, please.", ipa:"ew keˈɾijɐ ũ esˈpɾɛsu poɾ faˈvoɾ", tags:["restaurant"]},
+  {id:102, pt:"Tem pão de queijo?", en:"Do you have cheese bread?", ipa:"tẽ paw dʒi ˈkeʒu", tags:["restaurant"]},
+  {id:103, pt:"Sem gelo / Com gelo.", en:"No ice / With ice.", ipa:"sẽ ˈʒelu / kõ ˈʒelu", tags:["restaurant"]},
+  {id:104, pt:"Sem / Com açúcar.", en:"Without / With sugar.", ipa:"sẽ / kõ aˈsukɐɾ", tags:["restaurant"]},
+  {id:105, pt:"Pode ser no cartão?", en:"Can I pay by card?", ipa:"ˈpɔdʒi seɾ nu kaɾˈtɐ̃w", tags:["payment"]},
+  {id:106, pt:"Quanto fica tudo?", en:"How much is everything?", ipa:"ˈkwɐ̃tu ˈfikɐ ˈtudu", tags:["shopping"]},
+  {id:107, pt:"Pra viagem, por favor.", en:"To go, please.", ipa:"pɾa vjaˈʒẽj poɾ faˈvoɾ", tags:["restaurant"]},
+  {id:108, pt:"A conta vai no nome...", en:"Put the check under the name...", ipa:"a ˈkõtɐ vaj nu ˈnomi", tags:["restaurant"]}
+];
+const RIDESHARE = [
+  {id:201, pt:"Boa noite! Você é o(a) motorista?", en:"Good evening! Are you the driver?", ipa:"ˈboa ˈnojtʃi voˈse ɛ u mo̞toˈɾistɐ", tags:["rideshare"]},
+  {id:202, pt:"Vamos para o endereço...", en:"We’re going to the address...", ipa:"ˈvɐmuz ˈpaɾɐ u ẽdeˈɾesu", tags:["rideshare"]},
+  {id:203, pt:"Pode ligar o ar-condicionado?", en:"Can you turn on the AC?", ipa:"ˈpɔdʒi liˈgaɾ u aʁ kõdʒisjõˈnadu", tags:["rideshare"]},
+  {id:204, pt:"Pode parar aqui, por favor.", en:"Please stop here.", ipa:"ˈpɔdʒi paˈɾaʁ aˈki poɾ faˈvoɾ", tags:["rideshare"]},
+  {id:205, pt:"Aceita dinheiro ou só cartão?", en:"Do you take cash or only card?", ipa:"aˈsejtɐ dʒiˈɲejɾu ow sɔ kaʁˈtɐ̃w", tags:["payment"]}
+];
+const EMERGENCY = [
+  {id:301, pt:"Eu preciso de ajuda.", en:"I need help.", ipa:"ˈew pɾeˈzizu dʒi aˈʒudɐ", tags:["emergency"]},
+  {id:302, pt:"Chame a polícia, por favor.", en:"Call the police, please.", ipa:"ˈʃɐmi a poˈlisjɐ poɾ faˈvoɾ", tags:["emergency"]},
+  {id:303, pt:"Estou passando mal.", en:"I’m feeling sick.", ipa:"isˈtow paˈsɐ̃du ˈmaw", tags:["health"]},
+  {id:304, pt:"Onde fica o hospital mais perto?", en:"Where is the nearest hospital?", ipa:"ˈõdʒi ˈfikɐ u oʃpiˈtaw majʃ ˈpɛɾtu", tags:["health"]},
+  {id:305, pt:"Perdi meus documentos.", en:"I lost my documents/ID.", ipa:"peʁˈdʒi mews dokuˈmẽtus", tags:["safety"]}
+];
+
+const DECKS = { core: CORE, restaurant: RESTAURANT, rideshare: RIDESHARE, emergency: EMERGENCY };
+
+// ---------- Minimal pairs ----------
+const MP = [
+  {a:"pato", a_en:"duck", b:"bato", b_en:"I beat"}, {a:"faca", a_en:"knife", b:"vaca", b_en:"cow"},
+  {a:"casa", a_en:"house", b:"caça", b_en:"hunt"}, {a:"tia", a_en:"aunt", b:"dia", b_en:"day"},
+  {a:"pão", a_en:"bread (nasal)", b:"pau", b_en:"stick"}, {a:"caro", a_en:"expensive", b:"carro", b_en:"car"},
+  {a:"geral", a_en:"general", b:"eral", b_en:"(elision)"}, {a:"mato", a_en:"woods", b:"moto", b_en:"motorcycle"}
+];
+
+// ---------- State per deck ----------
+const LS_KEY = "turbo-pt-v2-state";
+let state = loadState();
+let currentDeckKey = state.currentDeckKey || "core";
+
+function loadState(){
+  const s = localStorage.getItem(LS_KEY);
+  if(s) return JSON.parse(s);
+  const deckStates = {};
+  for(const k of Object.keys(DECKS)){
+    deckStates[k] = DECKS[k].map(x => ({id:x.id, ease:250, ivl:0, rep:0, due:Date.now(), lapses:0, stats:{seen:0, correct:0}}));
+  }
+  return { deckStates, streak:0, lastDay:dayStamp(), reviewsToday:0, correctToday:0, currentDeckKey:"core" };
+}
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+function dayStamp(){ return new Date().toISOString().slice(0,10); }
+
+// ---------- Tabs ----------
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentDeckKey = tab.dataset.deck;
+    state.currentDeckKey = currentDeckKey; save();
+    kpis(); setReviewEmpty(true);
+  });
+});
+
+// ---------- KPIs ----------
+function currentDeckState(){ return state.deckStates[currentDeckKey]; }
+function kpis(){
+  const deck = currentDeckState();
+  const dueNow = deck.filter(c => c.due <= Date.now()).length;
+  const newCount = deck.filter(c => c.rep===0).length;
+  document.getElementById("kpi-due").textContent = dueNow;
+  document.getElementById("kpi-new").textContent = newCount;
+  document.getElementById("kpi-streak").textContent = state.streak;
+  const ret = state.reviewsToday? Math.round(100*state.correctToday/state.reviewsToday)+'%' : '–';
+  document.getElementById("kpi-ret").textContent = ret;
+}
+kpis();
+
+// ---------- Streak maintenance ----------
+(function(){
+  const today = dayStamp();
+  if(state.lastDay !== today){
+    const prev = new Date(state.lastDay);
+    const diff = Math.round((new Date(today)-prev)/86400000);
+    state.streak = (diff===1) ? (state.streak||0)+1 : 1;
+    state.lastDay = today;
+    state.reviewsToday = 0; state.correctToday = 0;
+    save(); kpis();
+  } else if(!state.streak){ state.streak = 1; save(); }
+})();
+
+// ---------- Review Queue ----------
+let queue = []; let current = null; let learningMode = false;
+function buildQueue(n=20){
+  const deck = currentDeckState();
+  queue = deck.filter(c => c.due <= Date.now()).sort((a,b)=>a.due-b.due).slice(0,n);
+}
+function buildNew(n=5){
+  const deck = currentDeckState();
+  queue = deck.filter(c => c.rep===0).slice(0,n);
+  learningMode = true;
+}
+function idxById(id){ return currentDeckState().findIndex(x=>x.id===id); }
+
+// ---------- UI Helpers ----------
+const el = id => document.getElementById(id);
+function setReviewEmpty(show){
+  el("review-empty").classList.toggle("hidden", !show);
+  el("review-ui").classList.toggle("hidden", show);
+}
+function deckData(){ return DECKS[currentDeckKey]; }
+function renderCard(){
+  if(queue.length===0){ setReviewEmpty(true); kpis(); return; }
+  setReviewEmpty(false);
+  current = queue[0];
+  const data = deckData().find(x=>x.id===current.id);
+  el("card-idx").textContent = `${currentDeckKey.toUpperCase()} • Card ${idxById(current.id)+1} / ${currentDeckState().length}`;
+  el("pt").textContent = data.pt;
+  el("ipa").textContent = data.ipa || "";
+  el("tags").innerHTML = (data.tags||[]).map(t=>`<span class="tag">${t}</span>`).join("");
+  el("en").textContent = data.en;
+  el("en").classList.add("hidden");
+  el("ratebar").classList.add("hidden");
+  el("rec-status").textContent = "";
+}
+function reveal(){
+  el("en").classList.remove("hidden");
+  el("ratebar").classList.remove("hidden");
+}
+
+// ---------- Speech ----------
+function speak(text, lang='pt-BR'){
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang; u.rate=1.0;
+  window.speechSynthesis.speak(u);
+}
+function playSample(pt){ speak(pt,'pt-BR'); }
+
+// ---------- Recording ----------
+let mediaRecorder, chunks=[], recording=false;
+async function toggleRecord(){
+  if(recording){ mediaRecorder.stop(); recording=false; return; }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder = new MediaRecorder(stream);
+    chunks=[];
+    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+    mediaRecorder.onstop = e => {
+      const blob = new Blob(chunks,{type:'audio/webm'});
+      const url = URL.createObjectURL(blob);
+      el("rec-status").innerHTML = `Recorded. <a class="link" href="${url}" target="_blank">Play</a>`;
+    };
+    mediaRecorder.start();
+    recording = true;
+    el("rec-status").textContent = "Recording… tap again to stop.";
+    setTimeout(()=>{ if(recording){ mediaRecorder.stop(); recording=false; }}, 8000);
+  }catch(err){
+    el("rec-status").textContent = "Mic requires HTTPS + permission (open from a secure URL).";
+  }
+}
+el("btn-record").addEventListener("click", ()=>{ toggleRecord(); });
+
+// ---------- SM-2 Grading ----------
+function grade(q){
+  const i = idxById(current.id);
+  const c = currentDeckState()[i];
+  state.reviewsToday = (state.reviewsToday||0)+1;
+  if(q>=3) state.correctToday = (state.correctToday||0)+1;
+
+  const now = Date.now();
+  if(q < 3){
+    c.lapses += 1; c.rep = Math.max(0, c.rep-1);
+    c.ivl = 0; c.due = now + 12*60*60*1000; // 12h
+    c.ease = Math.max(130, c.ease - 20);
+  } else {
+    c.rep += 1;
+    c.ease = Math.max(130, c.ease + (q-3)*10);
+    c.ivl = (c.ivl===0) ? 24*60*60*1000 : Math.round(c.ivl * (c.ease/100));
+    if(c.rep===1) c.ivl = 24*60*60*1000; // 1 day
+    if(c.rep===2) c.ivl = 3*24*60*60*1000; // 3 days
+    c.due = now + c.ivl;
+  }
+  c.stats.seen = (c.stats.seen||0)+1;
+  if(q>=3) c.stats.correct = (c.stats.correct||0)+1;
+  save();
+  queue.shift();
+  renderCard();
+  kpis();
+}
+
+// ---------- Buttons ----------
+el("btn-start").addEventListener("click", ()=>{ learningMode=false; buildQueue(); renderCard(); });
+el("btn-new").addEventListener("click", ()=>{ buildNew(5); renderCard(); });
+el("btn-reveal").addEventListener("click", reveal);
+el("btn-tts").addEventListener("click", ()=>{
+  const data = deckData().find(x=>x.id===current.id);
+  speak(data.pt,'pt-BR');
+});
+document.getElementById("btn-mission").addEventListener("click", nextMission);
+
+// ---------- Minimal Pairs UI ----------
+let mpIdx = 0;
+function mpRender(){
+  const x = MP[mpIdx];
+  document.getElementById("mp-a").textContent = x.a; document.getElementById("mp-a-en").textContent = " – " + x.a_en;
+  document.getElementById("mp-b").textContent = x.b; document.getElementById("mp-b-en").textContent = " – " + x.b_en;
+  const sel = document.getElementById("mp-select"); sel.innerHTML="";
+  MP.forEach((it,i)=>{
+    const opt = document.createElement("option");
+    opt.value=i; opt.textContent = `${i+1}. ${it.a} / ${it.b}`;
+    if(i===mpIdx) opt.selected=true;
+    sel.appendChild(opt);
+  });
+}
+function mpPlayA(){ speak(MP[mpIdx].a,'pt-BR'); }
+function mpPlayB(){ speak(MP[mpIdx].b,'pt-BR'); }
+function mpRandom(){ mpIdx = Math.floor(Math.random()*MP.length); mpRender(); }
+document.getElementById("mp-select").addEventListener("change", (e)=>{ mpIdx = +e.target.value; mpRender(); });
+mpRender();
+
+// ---------- Missions ----------
+const MISSIONS = [
+  "No café: peça um espresso e um pão de queijo, e pergunte o preço.",
+  "No Uber: cumprimente o motorista e diga para onde você vai.",
+  "Na praia: pergunte onde fica o banheiro e se há um quiosque perto.",
+  "No restaurante: peça água sem gelo e a conta no final.",
+  "No hotel: faça check-in e confirme o horário do café da manhã.",
+  "Compras: pergunte se aceita cartão e se tem outra cor/tamanho."
+];
+function currentMission(){ return localStorage.getItem("mission") || MISSIONS[0]; }
+function setMission(m){ localStorage.setItem("mission", m); document.getElementById("mission").textContent = m; }
+function nextMission(){ const m = MISSIONS[Math.floor(Math.random()*MISSIONS.length)]; setMission(m); }
+function speakMission(){ speak(currentMission(),'pt-BR'); }
+setMission(currentMission());
+
+// ---------- Export ----------
+document.getElementById("btn-export").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "turbo-pt-progress-v2.json"; a.click();
+});
+
+// ---------- Initial UI ----------
+function renderAll(){ setReviewEmpty(true); kpis(); }
+renderAll();
+</script>
+</body>
+</html>
